@@ -1,87 +1,99 @@
-import React, { useState } from 'react';
-import { Send } from 'lucide-react';
-import axios from 'axios';
-import PDFViewer from './PdfView';  // Assuming PdfView handles displaying the PDF
+import React, { useState } from "react";
+import { Send } from "lucide-react";
+import axios from "axios";
+import PDFViewer from "./PdfView"; // Assuming PdfView handles displaying the PDF
 
 const ChatInterface = () => {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [file, setFile] = useState(null);
-  const [pdfName, setPdfName] = useState('');
-  const [pdfText, setPdfText] = useState('');
+  const [pdfName, setPdfName] = useState("");
+  const [pdfUrl, setPdfUrl] = useState(null); // To store the Object URL for the uploaded file
+  const [pdfText, setPdfText] = useState("");
   const [chat, setChat] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // Handle File Upload
   const handleFileUpload = async (e) => {
     const selectedFile = e.target.files[0];
-    if (selectedFile && selectedFile.type === 'application/pdf') {
+    if (selectedFile && selectedFile.type === "application/pdf") {
       setFile(selectedFile);
+
+      // Create an object URL for the selected PDF
+      const fileUrl = URL.createObjectURL(selectedFile);
+      setPdfUrl(fileUrl); // Pass the object URL to pdfUrl
+
       const formData = new FormData();
-      formData.append('file', selectedFile);
+      formData.append("file", selectedFile);
 
       try {
-        const response = await axios.post('http://127.0.0.1:8000/upload_pdf/', formData);
+        const response = await axios.post(
+          "http://127.0.0.1:8000/upload_pdf/",
+          formData
+        );
         setPdfName(response.data.filename);
         setPdfText(response.data.pdf_text); // Assuming the server sends the text for preview
         setChat((prev) => [
           ...prev,
           {
-            role: 'assistant',
+            role: "assistant",
             content: `PDF "${response.data.filename}" uploaded successfully. Preview: ${response.data.pdf_text}`,
           },
         ]);
       } catch (error) {
-        console.error('Error uploading PDF:', error);
+        console.error("Error uploading PDF:", error);
         setChat((prev) => [
           ...prev,
           {
-            role: 'assistant',
-            content: 'Failed to upload the PDF. Please try again.',
+            role: "assistant",
+            content: "Failed to upload the PDF. Please try again.",
           },
         ]);
       }
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!message.trim() || !pdfName) return;
-  
-    setChat((prev) => [...prev, { role: 'user', content: message }]);
-    setMessage('');
+
+    setChat((prev) => [...prev, { role: "user", content: message }]);
+    setMessage("");
     setIsLoading(true);
-  
+
     try {
       const response = await axios.post(
-        'http://127.0.0.1:8000/ask_question/',
+        "http://127.0.0.1:8000/ask_question/",
         null, // No body is sent when using query parameters
         {
           params: {
             pdf_filename: pdfName, // Query parameter 1
-            question: message,      // Query parameter 2
+            question: message, // Query parameter 2
           },
         }
       );
-  
+
       console.log(response.data);
       const { answer, relevant_chunks } = response.data.answer;
-  
+
       // Display the answer content as string (use .toString() or JSON.stringify if it is an object)
       setChat((prev) => [
         ...prev,
         {
-          role: 'assistant',
-          content: answer ? answer.toString() : 'No answer available', // Make sure content is a string
+          role: "assistant",
+          content: answer ? answer.toString() : "No answer available", // Make sure content is a string
         },
       ]);
-  
+
       // Safely check if relevant_chunks is an array before using forEach
       if (Array.isArray(relevant_chunks)) {
         relevant_chunks.forEach((chunk, index) => {
           setChat((prev) => [
             ...prev,
             {
-              role: 'assistant',
-              content: `Relevant Chunk ${index + 1} from Page ${chunk.page}: ${chunk.text ? chunk.text.toString() : ''}`,
+              role: "assistant",
+              content: `Relevant Chunk ${index + 1} from Page ${chunk.page}: ${
+                chunk.text ? chunk.text.toString() : ""
+              }`,
             },
           ]);
         });
@@ -89,25 +101,26 @@ const ChatInterface = () => {
         setChat((prev) => [
           ...prev,
           {
-            role: 'assistant',
-            content: 'No relevant chunks found.',
+            role: "assistant",
+            content: "No relevant chunks found.",
           },
         ]);
       }
     } catch (error) {
-      console.error('Error asking question:', error);
+      console.error("Error asking question:", error);
       setChat((prev) => [
         ...prev,
         {
-          role: 'assistant',
-          content: 'Sorry, something went wrong while processing your question.',
+          role: "assistant",
+          content:
+            "Sorry, something went wrong while processing your question.",
         },
       ]);
     } finally {
       setIsLoading(false);
     }
   };
-    
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Top Bar */}
@@ -135,7 +148,9 @@ const ChatInterface = () => {
             >
               Upload PDF
             </label>
-            <span className="text-sm text-gray-600">{pdfName || 'No PDF uploaded'}</span>
+            <span className="text-sm text-gray-600">
+              {pdfName || "No PDF uploaded"}
+            </span>
           </div>
         </div>
       </div>
@@ -154,12 +169,12 @@ const ChatInterface = () => {
           <div key={index} className="flex space-x-3">
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                msg.role === 'assistant'
-                  ? 'bg-green-100 text-green-600'
-                  : 'bg-purple-200 text-purple-600'
+                msg.role === "assistant"
+                  ? "bg-green-100 text-green-600"
+                  : "bg-purple-200 text-purple-600"
               }`}
             >
-              {msg.role === 'assistant' ? '🤖' : '👤'}
+              {msg.role === "assistant" ? "🤖" : "👤"}
             </div>
             <div className="flex-1">
               <p className="text-gray-600">{msg.content}</p>

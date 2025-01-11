@@ -1,0 +1,64 @@
+from fastapi import FastAPI, File, UploadFile, Query
+from fastapi.middleware.cors import CORSMiddleware
+from models.pdf_processor import extract_text_from_pdf, get_answer_from_pdf
+from fastapi.responses import JSONResponse
+import os
+
+app = FastAPI()
+
+# Add CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Replace with your frontend's origin
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Directory to store uploaded PDFs
+UPLOAD_DIR = './uploads'
+
+# Ensure the upload directory exists
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+@app.on_event("startup")
+async def startup_event():
+    print("Application is starting...")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    print("Application is shutting down...")
+
+@app.get("/test/")
+def test():
+    return "working"
+
+@app.post("/upload_pdf/")
+async def upload_pdf(file: UploadFile = File(...)):
+    """Endpoint for uploading PDF files and extracting text."""
+    file_location = os.path.join(UPLOAD_DIR, file.filename)
+    with open(file_location, "wb") as pdf_file:
+        content = await file.read()
+        pdf_file.write(content)
+    
+    # Extract text from uploaded PDF
+    pdf_text = extract_text_from_pdf(file_location)
+    return {"filename": file.filename, "pdf_text": pdf_text[:300]}  # Return first 300 chars as a preview
+
+@app.post("/ask_question/")
+async def ask_question(
+    pdf_filename: str = Query(..., description="The filename of the uploaded PDF"),
+    question: str = Query(..., description="The question to ask about the PDF content")
+):
+    """Endpoint for asking questions about a PDF."""
+    file_location = os.path.join(UPLOAD_DIR, pdf_filename)
+    
+    if not os.path.exists(file_location):
+        return JSONResponse(status_code=404, content={"message": "PDF file not found"})
+    
+    # Extract text from the uploaded PDF
+    # pdf_text = extract_text_from_pdf(file_location)
+    
+    # Get answer using LangChain & HuggingFace models
+    answer = get_answer_from_pdf(file_location, question)
+    
+    return {"question": question, "answer": answer}
