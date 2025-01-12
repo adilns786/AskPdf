@@ -1,53 +1,53 @@
-import React, { useState } from "react";
-import { Send } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Send, PanelLeftOpen, PanelLeftClose, Upload, Download } from "lucide-react";
 import axios from "axios";
-import PDFViewer from "./PdfView"; // Assuming PdfView handles displaying the PDF
+import PDFViewer from "./PdfView";
 
 const ChatInterface = () => {
   const [message, setMessage] = useState("");
   const [file, setFile] = useState(null);
   const [pdfName, setPdfName] = useState("");
-  const [pdfUrl, setPdfUrl] = useState(null); // To store the Object URL for the uploaded file
+  const [pdfUrl, setPdfUrl] = useState(null);
   const [pdfText, setPdfText] = useState("");
   const [chat, setChat] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
 
-  // Handle File Upload
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [pdfUrl]);
+
   const handleFileUpload = async (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile && selectedFile.type === "application/pdf") {
       setFile(selectedFile);
-
-      // Create an object URL for the selected PDF
       const fileUrl = URL.createObjectURL(selectedFile);
-      setPdfUrl(fileUrl); // Pass the object URL to pdfUrl
+      setPdfUrl(fileUrl);
+      setIsPanelOpen(true);
 
       const formData = new FormData();
       formData.append("file", selectedFile);
 
       try {
-        const response = await axios.post(
-          "http://127.0.0.1:8000/upload_pdf/",
-          formData
-        );
+        const response = await axios.post("http://127.0.0.1:8000/upload_pdf/", formData);
         setPdfName(response.data.filename);
-        setPdfText(response.data.pdf_text); // Assuming the server sends the text for preview
-        setChat((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: `PDF "${response.data.filename}" uploaded successfully. Preview: ${response.data.pdf_text}`,
-          },
-        ]);
+        setPdfText(response.data.pdf_text);
+        setChat((prev) => [...prev, {
+          role: "assistant",
+          content: `PDF "${response.data.filename}" loaded successfully.`
+        }]);
       } catch (error) {
         console.error("Error uploading PDF:", error);
-        setChat((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: "Failed to upload the PDF. Please try again.",
-          },
-        ]);
+        setChat((prev) => [...prev, {
+          role: "assistant",
+          content: "Failed to upload the PDF. Please try again."
+        }]);
+        URL.revokeObjectURL(fileUrl);
+        setPdfUrl(null);
       }
     }
   };
@@ -61,151 +61,153 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/ask_question/",
-        null, // No body is sent when using query parameters
-        {
-          params: {
-            pdf_filename: pdfName, // Query parameter 1
-            question: message, // Query parameter 2
-          },
-        }
-      );
+      const response = await axios.post("http://127.0.0.1:8000/ask_question/", null, {
+        params: {
+          pdf_filename: pdfName,
+          question: message,
+        },
+      });
 
-      console.log(response.data);
       const { answer, relevant_chunks } = response.data.answer;
 
-      // Display the answer content as string (use .toString() or JSON.stringify if it is an object)
-      setChat((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: answer ? answer.toString() : "No answer available", // Make sure content is a string
-        },
-      ]);
+      setChat((prev) => [...prev, {
+        role: "assistant",
+        content: answer ? answer.toString() : "No answer available"
+      }]);
 
-      // Safely check if relevant_chunks is an array before using forEach
-      if (Array.isArray(relevant_chunks)) {
-        relevant_chunks.forEach((chunk, index) => {
-          setChat((prev) => [
-            ...prev,
-            {
-              role: "assistant",
-              content: `Relevant Chunk ${index + 1} from Page ${chunk.page}: ${
-                chunk.text ? chunk.text.toString() : ""
-              }`,
-            },
-          ]);
-        });
-      } else {
-        setChat((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: "No relevant chunks found.",
-          },
-        ]);
+      if (Array.isArray(relevant_chunks) && relevant_chunks.length > 0) {
+        setChat((prev) => [...prev, {
+          role: "assistant",
+          content: "📄 Relevant sections found:",
+          chunks: relevant_chunks
+        }]);
       }
     } catch (error) {
       console.error("Error asking question:", error);
-      setChat((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            "Sorry, something went wrong while processing your question.",
-        },
-      ]);
+      setChat((prev) => [...prev, {
+        role: "assistant",
+        content: "Sorry, something went wrong while processing your question."
+      }]);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Top Bar */}
-      <div className="border-b border-gray-200 p-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <img
-              src="/api/placeholder/32/32"
-              alt="Planet Logo"
-              className="h-8"
-            />
-            <span className="font-medium text-gray-800">planet</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={handleFileUpload}
-              className="hidden"
-              id="fileUpload"
-            />
-            <label
-              htmlFor="fileUpload"
-              className="px-4 py-1.5 border border-gray-300 rounded-full text-sm cursor-pointer"
-            >
-              Upload PDF
-            </label>
-            <span className="text-sm text-gray-600">
-              {pdfName || "No PDF uploaded"}
-            </span>
+      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-full mx-auto px-4 py-3">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setIsPanelOpen(!isPanelOpen)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+                title={isPanelOpen ? "Hide PDF" : "Show PDF"}
+              >
+                {isPanelOpen ? (
+                  <PanelLeftClose className="h-5 w-5 text-gray-600" />
+                ) : (
+                  <PanelLeftOpen className="h-5 w-5 text-gray-600" />
+                )}
+              </button>
+              <span className="font-medium text-gray-800">PDF Chat Assistant</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileUpload}
+                className="hidden"
+                id="fileUpload"
+              />
+              <label
+                htmlFor="fileUpload"
+                className="flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 cursor-pointer"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Upload PDF
+              </label>
+              {pdfName && (
+                <span className="text-sm text-gray-600 truncate max-w-xs">
+                  {pdfName}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* PDF Viewer */}
-      {pdfName && pdfText && (
-        <div className="p-4 max-w-7xl mx-auto">
-          <h2 className="text-xl mb-4">PDF Preview</h2>
-          <PDFViewer pdfText={pdfText} /> {/* Display PDF preview */}
-        </div>
-      )}
-
-      {/* Chat Area */}
-      <div className="flex-1 overflow-auto p-4 space-y-6 max-w-7xl mx-auto">
-        {chat.map((msg, index) => (
-          <div key={index} className="flex space-x-3">
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                msg.role === "assistant"
-                  ? "bg-green-100 text-green-600"
-                  : "bg-purple-200 text-purple-600"
-              }`}
-            >
-              {msg.role === "assistant" ? "🤖" : "👤"}
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* PDF Panel */}
+        {isPanelOpen && pdfUrl && (
+          <div className="w-1/2 border-r border-gray-200 bg-white overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-lg font-medium text-gray-800">PDF Preview</h2>
             </div>
-            <div className="flex-1">
-              <p className="text-gray-600">{msg.content}</p>
+            <div className="flex-1 overflow-auto">
+              <PDFViewer pdfUrl={pdfUrl} pdfText={pdfText} />
             </div>
-          </div>
-        ))}
-        {isLoading && (
-          <div className="flex items-center justify-center">
-            <div className="h-5 w-5 animate-spin border-t-2 border-blue-600 border-transparent rounded-full"></div>
           </div>
         )}
-      </div>
 
-      {/* Input Area */}
-      <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
-        <div className="max-w-7xl mx-auto">
-          <form onSubmit={handleSubmit} className="relative">
-            <input
-              type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Ask a question about the PDF..."
-              className="w-full p-3 pr-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="submit"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              <Send className="h-5 w-5" />
-            </button>
-          </form>
+        {/* Chat Section */}
+        <div className={`flex-1 flex flex-col ${isPanelOpen ? 'w-1/2' : 'w-full'}`}>
+          {/* Messages */}
+          <div className="flex-1 overflow-auto p-4 space-y-4">
+            {chat.map((msg, index) => (
+              <div key={index} className={`flex space-x-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-3xl rounded-lg p-4 ${
+                  msg.role === 'user' 
+                    ? 'bg-blue-500 text-white ml-12' 
+                    : 'bg-white shadow-sm border border-gray-200 mr-12'
+                }`}>
+                  <p>{msg.content}</p>
+                  {msg.chunks && (
+                    <div className="mt-2 space-y-2">
+                      {msg.chunks.map((chunk, idx) => (
+                        <div key={idx} className="text-sm p-2 bg-gray-50 rounded">
+                          <div className="text-xs text-gray-500">Page {chunk.page}</div>
+                          <div>{chunk.text}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+              </div>
+            )}
+          </div>
+
+          {/* Input Area */}
+          <div className="border-t border-gray-200 p-4 bg-white">
+            <form onSubmit={handleSubmit} className="relative">
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Ask a question about the PDF..."
+                className="w-full p-3 pr-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!pdfName}
+              />
+              <button
+                type="submit"
+                disabled={!pdfName || !message.trim()}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 ${
+                  !pdfName || !message.trim() 
+                    ? 'text-gray-300' 
+                    : 'text-blue-500 hover:text-blue-600'
+                }`}
+              >
+                <Send className="h-5 w-5" />
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
