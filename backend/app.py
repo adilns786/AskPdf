@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 load_dotenv()
 GEMINI_API_KEY =  os.getenv("GEMINI_API_KEY")
 
+PORT = int(os.getenv("PORT", 8000))  # Default to 8000 if no PORT is provided
+
 app = FastAPI()
 
 # Add CORS Middleware
@@ -103,4 +105,4 @@ async def chat_gemini(
     return {"question": question, "answer": answer}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=PORT)
