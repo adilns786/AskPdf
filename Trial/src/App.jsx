@@ -18,7 +18,22 @@ const App = () => {
 
   // state to manage server URL (localhost or deployed)
   const [serverUrl, setServerUrl] = useState("http://127.0.0.1:8000");
+  const [isModalOpen, setIsModalOpen] = useState(false); // To toggle modal visibility
 
+  useEffect(() => {
+    const checkServerAvailability = async () => {
+      try {
+        // Trying to connect to the local server to check if it's running
+        await axios.get(`${serverUrl}/test/`);
+      } catch (error) {
+        // If the connection fails, show the modal
+        console.log("Local server is not available, asking user to switch...");
+        setIsModalOpen(true);
+      }
+    };
+
+    checkServerAvailability();
+  }, []);
   useEffect(() => {
     return () => {
       if (pdfUrl) {
@@ -147,7 +162,7 @@ const App = () => {
           question: message,
         },
       });
-      console.log(response.data)
+      console.log(response.data);
       setChat((prev) => [
         ...prev,
         { role: "assistant", content: response.data.answer },
@@ -158,9 +173,13 @@ const App = () => {
         ...prev,
         { role: "assistant", content: "Error in chat process." },
       ]);
-    }finally {
+    } finally {
       setIsLoading(false);
     }
+  };
+  const handleServerChoice = (chosenServerUrl) => {
+    setServerUrl(chosenServerUrl); // Update the server URL based on user choice
+    setIsModalOpen(false); // Close the modal
   };
 
   return (
@@ -171,6 +190,7 @@ const App = () => {
         setIsPanelOpen={setIsPanelOpen}
         handleFileUpload={handleFileUpload}
         pdfName={pdfName}
+        serverUrl={serverUrl}
         setServerUrl={setServerUrl} // Function to update server URL
       />
 
@@ -187,6 +207,29 @@ const App = () => {
           handleChatGemini={handleChatGemini} // Button in UI for Chat Gemini
           pdfName={pdfName}
         />
+        {/* Modal for selecting server */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-10">
+            <div className="bg-white p-6 rounded-md">
+              <h2 className="text-xl mb-4">Local server not available</h2>
+              <p className="mb-6">Do you want to use the deployed server?</p>
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded-md mr-4"
+                onClick={() =>
+                  handleServerChoice("https://your-deployed-server-url.com")
+                }
+              >
+                Yes, use deployed server
+              </button>
+              <button
+                className="bg-gray-500 text-white px-4 py-2 rounded-md"
+                onClick={() => setIsModalOpen(false)}
+              >
+                No, keep trying local server
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

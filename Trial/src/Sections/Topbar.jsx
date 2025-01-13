@@ -13,6 +13,7 @@ const Navbar = ({
   setIsPanelOpen,
   handleFileUpload,
   pdfName,
+  serverUrl,
   setServerUrl,
 }) => {
   const handleServerChange = (e) => {
@@ -89,10 +90,10 @@ const Navbar = ({
                 id="serverSelect"
                 className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 onChange={handleServerChange}
-                defaultValue="http://127.0.0.1:8000"
+                value={serverUrl}
               >
                 <option value="http://127.0.0.1:8000">Localhost</option>
-                <option value="https://your-deployed-api-url.com">Deployed</option>
+                <option value="https://your-deployed-server-url.com">Deployed</option>
               </select>
             </div>
 

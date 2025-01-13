@@ -5,7 +5,7 @@ from models.pdf_processor import extract_text_from_pdf,get_answer_from_pdf
 from models.gemini_bot import analyze_pdf_content,answer_pdf_question
 import os
 from dotenv import load_dotenv
-
+import uvicorn
 # Load environment variables from .env file
 load_dotenv()
 GEMINI_API_KEY =  os.getenv("GEMINI_API_KEY")
