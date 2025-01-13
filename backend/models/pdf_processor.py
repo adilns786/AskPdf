@@ -4,6 +4,8 @@ from langchain.text_splitter import CharacterTextSplitter
 from typing import List, Dict
 import logging
 import re
+import spacy
+from collections import Counter
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -150,3 +152,4 @@ def get_answer_from_pdf(pdf_path: str, question: str, batch_size: int = 5) -> Di
             "answer": f"An error occurred while processing the document.{e}",
             "relevant_chunks": []
         }
+
