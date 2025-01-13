@@ -101,3 +101,6 @@ async def chat_gemini(
     answer = answer_pdf_question(pdf_text, question, api_key=GEMINI_API_KEY)
     
     return {"question": question, "answer": answer}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
