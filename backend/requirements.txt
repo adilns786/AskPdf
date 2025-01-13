@@ -7,3 +7,4 @@ spacy==3.8.3
 transformers==4.47.1
 uvicorn==0.22.0
 google-generativeai
+PyMuPDF
