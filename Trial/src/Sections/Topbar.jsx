@@ -93,7 +93,7 @@ const Navbar = ({
                 value={serverUrl}
               >
                 <option value="http://127.0.0.1:8000">Localhost</option>
-                <option value="https://your-deployed-server-url.com">Deployed</option>
+                <option value="https://askpdf-aj8j.onrender.com">Deployed</option>
               </select>
             </div>
 

@@ -8,4 +8,4 @@ uvicorn==0.22.0
 google-generativeai
 PyMuPDF
 python-multipart
-torch
+tensorflow

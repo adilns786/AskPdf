@@ -216,7 +216,7 @@ const App = () => {
               <button
                 className="bg-blue-500 text-white px-4 py-2 rounded-md mr-4"
                 onClick={() =>
-                  handleServerChoice("https://your-deployed-server-url.com")
+                  handleServerChoice("https://askpdf-aj8j.onrender.com")
                 }
               >
                 Yes, use deployed server

@@ -6,6 +6,12 @@ from models.gemini_bot import analyze_pdf_content,answer_pdf_question
 import os
 from dotenv import load_dotenv
 import uvicorn
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Load environment variables from .env file
 load_dotenv()   
 GEMINI_API_KEY =  os.getenv("GEMINI_API_KEY")
@@ -23,18 +29,22 @@ app.add_middleware(
 )
 
 # Directory to store uploaded PDFs
-UPLOAD_DIR = './uploads'
-
+UPLOAD_DIR = '/tmp/uploads'  # Use /tmp for temporary storage on Render
 # Ensure the upload directory exists
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 @app.on_event("startup")
 async def startup_event():
-    print("Application is starting...")
+    logger.info("Application is starting...")
+    try:
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+        logger.info(f"Created upload directory at {UPLOAD_DIR}")
+    except Exception as e:
+        logger.error(f"Failed to create upload directory: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    print("Application is shutting down...")
-
+    logger.info("Application is shutting down...")
 @app.get("/test/")
 def test():
     return {"message": "API is working"}
@@ -104,5 +114,13 @@ async def chat_gemini(
     return {"question": question, "answer": answer}
 
 if __name__ == "__main__":
-    PORT = int(os.getenv("PORT", 8000))  # Default to 8000 if no PORT is provided
-    uvicorn.run(app, host="0.0.0.0", port=PORT)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(
+        "app:app",
+        host="0.0.0.0",
+        port=port,
+        workers=4,  # Multiple workers for better performance
+        log_level="info",
+        timeout_keep_alive=40,
+        loop="auto"
+    )
