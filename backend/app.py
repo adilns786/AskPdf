@@ -7,10 +7,9 @@ import os
 from dotenv import load_dotenv
 import uvicorn
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv()   
 GEMINI_API_KEY =  os.getenv("GEMINI_API_KEY")
 
-PORT = int(os.getenv("PORT", 8000))  # Default to 8000 if no PORT is provided
 
 app = FastAPI()
 
@@ -105,4 +104,5 @@ async def chat_gemini(
     return {"question": question, "answer": answer}
 
 if __name__ == "__main__":
+    PORT = int(os.getenv("PORT", 8000))  # Default to 8000 if no PORT is provided
     uvicorn.run(app, host="0.0.0.0", port=PORT)
