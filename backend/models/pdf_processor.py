@@ -1,4 +1,4 @@
-import fitz
+import pymupdf
 from transformers import pipeline
 from langchain.text_splitter import CharacterTextSplitter
 from typing import List, Dict
@@ -44,7 +44,7 @@ def get_relevant_chunks(chunks: List[str], question: str, qa_pipeline, pdf_path:
             return None
 
     # Open the PDF to extract text and page information
-    document = fitz.open(pdf_path)
+    document = pymupdf.open(pdf_path)
     
     # Use ThreadPoolExecutor for parallel processing
     with ThreadPoolExecutor(max_workers=batch_size) as executor:
@@ -79,7 +79,7 @@ def get_relevant_chunks(chunks: List[str], question: str, qa_pipeline, pdf_path:
 def extract_text_from_pdf(pdf_path: str) -> str:
     """Extract text from a PDF using PyMuPDF."""
     try:
-        document = fitz.open(pdf_path)
+        document = pymupdf.open(pdf_path)
         full_text = ""
         for page in document:
             full_text += page.get_text()
