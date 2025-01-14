@@ -4,6 +4,7 @@ import axios from "axios";
 import Navbar from "./Sections/Topbar";
 import Chatbox from "./Sections/ChatInterface";
 import PdfPreview from "./Sections/PdfSec";
+import EmptyChatState from "./Sections/EmptyChat";
 
 const App = () => {
   const [message, setMessage] = useState("");
@@ -197,7 +198,10 @@ const App = () => {
       {/* PDF Preview and Chat Section */}
       <div className="flex-1 flex overflow-hidden h-[calc(100vh-4rem)]">
         <PdfPreview isPanelOpen={isPanelOpen} pdfUrl={pdfUrl} chunks={chunks} />
-        <Chatbox
+        {!pdfName ? (
+      <EmptyChatState handleFileUpload={handleFileUpload} chat={chat}/>
+    ) : (
+      <Chatbox
           chat={chat}
           isLoading={isLoading}
           message={message}
@@ -207,8 +211,10 @@ const App = () => {
           handleChatGemini={handleChatGemini} // Button in UI for Chat Gemini
           pdfName={pdfName}
         />
+    )}
+       
         {/* Modal for selecting server */}
-        {isModalOpen && (
+        {/* {isModalOpen && (
           <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-10">
             <div className="bg-white p-6 rounded-md">
               <h2 className="text-xl mb-4">Local server not available</h2>
@@ -229,7 +235,7 @@ const App = () => {
               </button>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

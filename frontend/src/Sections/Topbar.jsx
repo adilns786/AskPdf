@@ -38,11 +38,17 @@ const Navbar = ({
               )}
             </button>
             <div className="flex items-center space-x-2">
-              <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-lg">
-                <FileText className="h-5 w-5" />
+              <div className="flex items-center justify-center w-8 h-8  text-white rounded-lg">
+              <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="40" fill="#4CAF50"/>
+  
+  <circle cx="50" cy="50" r="45" fill="none" stroke="#4CAF50" stroke-width="2"/>
+  
+  <text x="50" y="50" font-family="Arial, sans-serif" font-size="36" fill="white" text-anchor="middle" dominant-baseline="central">ai</text>
+</svg>
               </div>
               <h1 className="hidden md:block font-semibold text-gray-900">
-                PDF Chat Assistant
+                Ask Pdf
               </h1>
             </div>
           </div>
@@ -79,7 +85,7 @@ const Navbar = ({
             </label>
 
             {/* Server Dropdown */}
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               <label
                 htmlFor="serverSelect"
                 className="text-gray-700 mr-2 text-sm font-medium"
@@ -95,7 +101,7 @@ const Navbar = ({
                 <option value="http://127.0.0.1:8000">Localhost</option>
                 <option value="https://askpdf-aj8j.onrender.com">Deployed</option>
               </select>
-            </div>
+            </div> */}
 
             {/* Mobile menu button */}
             <button className="sm:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg">
