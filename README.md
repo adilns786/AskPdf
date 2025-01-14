@@ -1,162 +1,168 @@
-# PDF Interaction Application
+# AskPDF
 
-An intelligent document interaction system that allows users to upload PDFs and interact with them through natural language queries. The application leverages advanced NLP models to provide document summaries and answer questions about PDF content.
+A sophisticated document interaction system that enables natural language-based PDF analysis. Upload PDFs and engage with their content through an intuitive interface powered by advanced NLP models for document summarization and question-answering capabilities.
 
-## Features
+## 🚀 Features
 
-- **PDF Upload & Management**
-  - Drag-and-drop interface for PDF uploads
-  - Document preview functionality
-  - Efficient storage and retrieval system
+### Document Management
+- Intuitive drag-and-drop interface for PDF uploads
+- Interactive document preview functionality
+- Efficient document storage and retrieval system
 
-- **Interactive Document Analysis**
-  - Natural language question-answering about document content
-  - Full document summarization
-  - Split-screen interface with PDF preview and chat
-  - Model switching between Hugging Face and Gemini for different analysis approaches
+### AI-Powered Analysis
+- Natural language question-answering for document content
+- Comprehensive document summarization
+- Dynamic model switching between Hugging Face and Google Gemini
+- Source attribution for generated answers
 
-- **Advanced Processing**
-  - Intelligent document chunking for efficient processing
-  - Multithreaded processing for improved performance
-  - Caching system for faster repeated queries
-  - Transparent display of source chunks used for answers
+### Technical Capabilities
+- Intelligent document chunking for processing optimization
+- Multi-threaded analysis for enhanced performance
+- Advanced caching system for rapid query responses
+- Split-screen interface combining PDF viewer and chat
 
-## Tech Stack
+## 🛠️ Technology Stack
 
 ### Frontend
-- React.js
-- PDF viewer component
-- Modern UI/UX with split-screen layout
-- Drag-and-drop file upload interface
+- **Framework**: React.js
+- **UI Components**: Custom PDF viewer
+- **Interface**: Modern split-screen layout with drag-and-drop capabilities
 
 ### Backend
-- FastAPI
-- PyMuPDF for PDF processing
-- SQLite/PostgreSQL for metadata storage
-- Multi-threading implementation
+- **Server**: FastAPI
+- **PDF Processing**: PyMuPDF
+- **Database**: SQLite/PostgreSQL
+- **Performance**: Multi-threaded architecture
 
-### AI/ML Integration
-- Hugging Face models for document analysis
-- Google Gemini API for enhanced processing
-- Custom prompt templates for optimal results
+### AI Integration
+- **Models**: Hugging Face & Google Gemini
+- **Processing**: Custom prompt engineering
+- **Analysis**: Advanced document chunking algorithms
 
-## Getting Started
+## 📋 Prerequisites
 
-### Prerequisites
+- Python 3.8 or higher
+- Node.js 14.0.0 or higher
+- Google Gemini API key
+
+## 🔧 Installation
+
+1. Clone the repository
 ```bash
-python >= 3.8
-node >= 14.0.0
+git clone https://github.com/adilns786/AskPdf.git
+cd AskPdf
 ```
 
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/pdf-interaction-app.git
-cd pdf-interaction-app
-```
-
-2. Install backend dependencies:
+2. Set up backend environment
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-3. Install frontend dependencies:
+3. Configure frontend
 ```bash
 cd frontend
 npm install
 ```
 
-4. Set up environment variables:
+4. Configure environment variables
 ```bash
-# Backend (.env)
-DATABASE_URL=your_database_url
+# Create .env file in backend directory
 GEMINI_API_KEY=your_gemini_api_key
-STORAGE_TYPE=local  # or 's3' for cloud storage
-
-# Frontend (.env)
-REACT_APP_API_URL=http://localhost:8000
 ```
 
-### Running the Application
+> Get your free Gemini API key at: https://aistudio.google.com/app/apikey
 
-1. Start the backend server:
+## 🚀 Running the Application
+
+1. Launch backend server
 ```bash
 cd backend
-uvicorn main:app --reload
+uvicorn app:app --reload
 ```
 
-2. Start the frontend development server:
+2. Start frontend development server
 ```bash
 cd frontend
-npm start
+npm run dev
 ```
 
-3. Access the application at `http://localhost:3000`
+3. Access the application at `http://localhost:5173`
 
-## Usage
+## 🔄 API Endpoints
 
-1. Upload a PDF using the drag-and-drop interface or file selector
-2. View the PDF in the left panel
-3. Use the chat interface in the right panel to:
-   - Ask questions about the document
-   - Generate document summaries
-   - Toggle between Hugging Face and Gemini models
-4. View source chunks used for generating answers
+### GET `/test/`
+- **Purpose**: API health check
+- **Response**: `{"message": "API is working"}`
 
-## API Endpoints
+### POST `/upload_pdf/`
+- **Purpose**: PDF upload and text extraction
+- **Input**: PDF file
+- **Response**: Filename and 300-character content preview
 
-### PDF Management
-- `POST /api/upload` - Upload a new PDF document
-- `GET /api/documents` - List all uploaded documents
-- `GET /api/documents/{id}` - Get specific document details
+### POST `/ask_question/`
+- **Purpose**: Question-answering based on PDF content
+- **Parameters**:
+  - `pdf_filename`: Name of uploaded PDF
+  - `question`: User query about PDF content
+- **Response**: Question and generated answer
 
-### Document Interaction
-- `POST /api/query` - Process questions about a document
-- `POST /api/summarize` - Generate document summary
-- `GET /api/chunks/{id}` - Retrieve specific document chunks
+### POST `/summarize/`
+- **Purpose**: PDF content summarization
+- **Parameter**: `pdf_filename`
+- **Response**: Filename and content summary
 
-## Performance Optimization
+### POST `/chat_gemini/`
+- **Purpose**: Gemini-powered PDF analysis
+- **Parameters**:
+  - `pdf_filename`: Target PDF
+  - `question`: User query
+- **Response**: AI-generated answer using Gemini
 
-The application implements several optimization strategies:
-- Document chunking for efficient processing
-- Multi-threaded chunk analysis
-- Result caching
-- Efficient database indexing
-- Optimized file storage management
+## 💡 Usage Guide
 
-## Future Improvements
+1. **Document Upload**
+   - Use drag-and-drop or file selector to upload PDF
+   - Preview document in left panel
 
-- Text-to-speech functionality for summaries
-- Additional NLP model integrations
-- Enhanced document chunking algorithms
-- Real-time collaboration features
-- Advanced caching mechanisms
+2. **Content Analysis**
+   - Utilize chat interface in right panel
+   - Ask specific questions about the document
+   - Request document summaries
+   - Switch between AI models as needed
 
-## Contributing
+3. **Results Review**
+   - View AI-generated responses
+   - Examine source chunks used for answers
+   - Toggle between different analysis modes
+
+## 🔮 Future Enhancements
+
+- Text-to-speech capabilities
+- Extended model integrations
+- Improved chunking algorithms
+- Collaborative features
+- Enhanced caching system
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+2. Create feature branch (`git checkout -b feature/YourFeature`)
+3. Commit changes (`git commit -m 'Add YourFeature'`)
+4. Push to branch (`git push origin feature/YourFeature`)
+5. Open Pull Request
 
-## License
+## 👏 Acknowledgments
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+- The FastAPI team
+- React.js community
+- Hugging Face and Google Gemini teams
+- PyMuPDF developers
 
-## Acknowledgments
+## 📫 Contact
 
-- FastAPI for the efficient backend framework
-- React.js for the frontend framework
-- Hugging Face and Google Gemini for NLP capabilities
-- PyMuPDF for PDF processing functionality
+Adil - [@adilns786](https://twitter.com/adilns786)
 
-## Contact
-
-Your Name - [@yourusername](https://twitter.com/yourusername)
-
-Project Link: [https://github.com/yourusername/pdf-interaction-app](https://github.com/yourusername/pdf-interaction-app)
+Project Repository: [github.com/adilns786/AskPdf](https://github.com/adilns786/AskPdf.git)
