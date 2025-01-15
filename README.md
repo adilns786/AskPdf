@@ -31,7 +31,6 @@ A sophisticated document interaction system that enables natural language-based 
 ### Backend
 - **Server**: FastAPI
 - **PDF Processing**: PyMuPDF
-- **Database**: SQLite/PostgreSQL
 - **Performance**: Multi-threaded architecture
 
 ### AI Integration
@@ -82,6 +81,7 @@ GEMINI_API_KEY=your_gemini_api_key
 cd backend
 uvicorn app:app --reload
 ```
+wait till "Application Startup Complete" is printed in server terminal
 
 2. Start frontend development server
 ```bash
